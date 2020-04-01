@@ -1,3 +1,8 @@
+turn = True
+player_one_pts = 0
+player_two_pts = 0
+
+
 class Dot:
     def __init__(self, point=None):
         if point:
@@ -34,6 +39,8 @@ class Dot:
             if not dot.played:
                 neighbours.append(dot)
 
+        sorted(neighbours, key=lambda dotts:dot.x)
+
         return f'{self.x}{self.y} is a neighbour to: {neighbours}'
 
 
@@ -67,6 +74,12 @@ def create_grid(m, n):
                         matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i - 2][j], matrix[i][j + 2]]
                     else:
                         matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i - 2][j]]
+                elif j == 0:
+                    if 0 < i < m - 1:
+                        matrix[i][j].neighbours = [matrix[i - 2][j], matrix[i][j + 2], matrix[i + 2][j]]
+                elif j == n - 1:
+                    if 0 < i < m - 1:
+                        matrix[i][j].neighbours = [matrix[i - 2][j], matrix[i][j - 2], matrix[i + 2][j]]
     return matrix
 
 
@@ -78,6 +91,15 @@ def print_grid(matrix):
 
 
 def play(grid, m, n):
+    global turn
+    global player_one_pts
+    global player_two_pts
+
+    if turn:
+        print('Player one plays!')
+    else:
+        print('Player two plays!')
+
     while True:
         try:
             x = int(input('Enter the x coordinate of the starting dot: '))
@@ -86,10 +108,12 @@ def play(grid, m, n):
                 if -1 < x < m and -1 < y < n:
                     if not grid[x][y].played:
                         break
+                    else:
+                        print('Already connected everything.')
                 else:
-                    print('Already connected everything.')
+                    print('Out of range!')
             else:
-                print('Out of range!')
+                print('Only dots!')
         except ValueError:
             print('Try again!')
 
@@ -101,26 +125,53 @@ def play(grid, m, n):
         try:
             k = int(input('Enter the x coordinate: '))
             l = int(input('Enter the y coordinate: '))
-            if -1 < k < m and -1 < l < n:
-                grid[x][y].look = '-'
-                grid[x][y].connected.append(grid[k][l])
-                grid[k][l].look = '-'
-                grid[k][l].connected.append(grid[x][y])
+            if k % 2 is 0 and l % 2 is 0:
+                if -1 < k < m and -1 < l < n:
+                    if l > y:
+                        grid[x][y + 1] = '_'
+                    elif k > x:
+                        grid[x + 1][y] = '|'
+                    elif y > l:
+                        grid[x][y - 1] = '_'
+                    elif x > k:
+                        grid[x - 1][y] = '|'
+                    grid[x][y].connected.append(grid[k][l])
+                    grid[k][l].connected.append(grid[x][y])
 
-                if grid[x][y].is_possible():
-                    pass
-                else:
-                    grid[x][y].played = True
+                    if grid[x][y].is_possible():
+                        pass
+                    else:
+                        grid[x][y].played = True
 
-                if grid[k][l].is_possible():
-                    pass
+                    if grid[k][l].is_possible():
+                        pass
+                    else:
+                        grid[k][l].played = True
+
+                    if check_grid(grid, m, n):
+                        if turn:
+                            player_one_pts += 1
+                        else:
+                            player_two_pts += 1
+                    else:
+                        turn = not turn
+
                 else:
-                    grid[k][l].played = True
+                    print('Out of range!')
                 break
             else:
-                print('Out of range!')
+                print('Only dots!')
         except ValueError:
             print('Try again!')
+
+
+def check_grid(grid, m, n):
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] is '_' and grid[i + 1][j + 1] is '|' and grid[i + 2][j] is '_' and grid[i + 1][j - 1] is '|':
+                grid[i + 1][j] = '#'
+                return True
+    return False
 
 
 def main():
