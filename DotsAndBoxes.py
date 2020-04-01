@@ -10,6 +10,18 @@ class Dot:
         self.neighbours = []
         self.connected = []
 
+    def __eq__(self, other):
+        if self.x is other.x and self.y is other.y:
+            return True
+        else:
+            return False
+
+    def __repr__(self):
+        return f'{self.x}{self.y}'
+
+    def __str__(self):
+        return f'{self.look}'
+
     def is_possible(self):
         if len(self.neighbours) is not len(self.connected):
             return True
@@ -24,39 +36,37 @@ class Dot:
 
         return f'{self.x}{self.y} is a neighbour to: {neighbours}'
 
-    def __repr__(self):
-        return f'{self.x}{self.y}'
-
-    def __str__(self):
-        return f'{self.look}'
-
 
 def create_grid(m, n):
     matrix = []
     for i in range(m):
         temp = []
         for j in range(n):
-            temp.append(Dot((i, j)))
+            if i % 2 is 0 and j % 2 is 0:
+                temp.append(Dot((i, j)))
+            else:
+                temp.append(' ')
         matrix.append(temp)
 
     for i in range(m):
         for j in range(n):
-            if 0 < i < m - 1 and 0 < j < n - 1:
-                matrix[i][j].neighbours = [matrix[i - 1][j], matrix[i][j + 1], matrix[i + 1][j], matrix[i][j - 1]]
-            elif i == 0:
-                if j == 0:
-                    matrix[i][j].neighbours = [matrix[i][j + 1], matrix[i + 1][j]]
-                elif 0 < j < n - 1:
-                    matrix[i][j].neighbours = [matrix[i][j - 1], matrix[i + 1][j], matrix[i][j + 1]]
-                else:
-                    matrix[i][j].neighbours = [matrix[i][j - 1], matrix[i + 1][j]]
-            elif i == m - 1:
-                if j == 0:
-                    matrix[i][j].neighbours = [matrix[i - 1][j], matrix[i][j + 1]]
-                elif 0 < j < n - 1:
-                    matrix[i][j].neighbours = [matrix[i][j - 1], matrix[i - 1][j], matrix[i][j + 1]]
-                else:
-                    matrix[i][j].neighbours = [matrix[i][j - 1], matrix[i - 1][j]]
+            if i % 2 is 0 and j % 2 is 0:
+                if 0 < i < m - 1 and 0 < j < n - 1:
+                    matrix[i][j].neighbours = [matrix[i - 2][j], matrix[i][j + 2], matrix[i + 2][j], matrix[i][j - 2]]
+                elif i == 0:
+                    if j == 0:
+                        matrix[i][j].neighbours = [matrix[i][j + 2], matrix[i + 2][j]]
+                    elif 0 < j < n - 1:
+                        matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i + 2][j], matrix[i][j + 2]]
+                    else:
+                        matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i + 2][j]]
+                elif i == m - 1:
+                    if j == 0:
+                        matrix[i][j].neighbours = [matrix[i - 2][j], matrix[i][j + 2]]
+                    elif 0 < j < n - 1:
+                        matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i - 2][j], matrix[i][j + 2]]
+                    else:
+                        matrix[i][j].neighbours = [matrix[i][j - 2], matrix[i - 2][j]]
     return matrix
 
 
@@ -72,8 +82,12 @@ def play(grid, m, n):
         try:
             x = int(input('Enter the x coordinate of the starting dot: '))
             y = int(input('Enter the y coordinate of the starting dot: '))
-            if -1 < x < m and -1 < y < n and not grid[x][y].played:
-                break
+            if x % 2 is 0 and y % 2 is 0:
+                if -1 < x < m and -1 < y < n:
+                    if not grid[x][y].played:
+                        break
+                else:
+                    print('Already connected everything.')
             else:
                 print('Out of range!')
         except ValueError:
@@ -87,7 +101,7 @@ def play(grid, m, n):
         try:
             k = int(input('Enter the x coordinate: '))
             l = int(input('Enter the y coordinate: '))
-            if -1 < k < m and -1 < l < n and grid[x][y]:
+            if -1 < k < m and -1 < l < n:
                 grid[x][y].look = '-'
                 grid[x][y].connected.append(grid[k][l])
                 grid[k][l].look = '-'
@@ -118,6 +132,9 @@ def main():
         except ValueError:
             print('Try again.')
             pass
+
+    m += m - 1
+    n += n - 1
 
     grid = create_grid(m, n)
     while True:
