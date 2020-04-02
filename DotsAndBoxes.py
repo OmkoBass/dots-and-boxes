@@ -1,6 +1,7 @@
 turn = True
 player_one_pts = 0
 player_two_pts = 0
+done = []
 
 
 class Dot:
@@ -15,6 +16,7 @@ class Dot:
         self.neighbours = []
         self.connected = []
 
+    # Compares two dots, return True if they are the same
     def __eq__(self, other):
         if self.x is other.x and self.y is other.y:
             return True
@@ -27,25 +29,29 @@ class Dot:
     def __str__(self):
         return f'{self.look}'
 
+    # Return true if you can play the dot
     def is_possible(self):
         if len(self.neighbours) is not len(self.connected):
             return True
         else:
             return False
 
+    # Display neighborus to a dot and sort them
     def neighbours_to(self):
         neighbours = []
         for dot in self.neighbours:
             if not dot.played:
                 neighbours.append(dot)
 
-        sorted(neighbours, key=lambda dotts:dot.x)
+        sorted(neighbours, key=lambda dots:dot.x)
 
         return f'{self.x}{self.y} is a neighbour to: {neighbours}'
 
 
 def create_grid(m, n):
     matrix = []
+
+    # First we create a dot, then we create blank space for line, then dot and so on
     for i in range(m):
         temp = []
         for j in range(n):
@@ -55,6 +61,9 @@ def create_grid(m, n):
                 temp.append(' ')
         matrix.append(temp)
 
+    # Now since the indexing is moved these are the rules for connecting everyone,
+    # [0][0] has a neighbour left to it and below it
+    # [1][1] has a neighbour everywhere around him (except diagonal)
     for i in range(m):
         for j in range(n):
             if i % 2 is 0 and j % 2 is 0:
@@ -95,6 +104,8 @@ def play(grid, m, n):
     global player_one_pts
     global player_two_pts
 
+    # turn True means player, turn False means player two or AI
+
     if turn:
         print('Player one plays!')
     else:
@@ -104,6 +115,7 @@ def play(grid, m, n):
         try:
             x = int(input('Enter the x coordinate of the starting dot: '))
             y = int(input('Enter the y coordinate of the starting dot: '))
+            # If not line and in range and not connected all dots
             if x % 2 is 0 and y % 2 is 0:
                 if -1 < x < m and -1 < y < n:
                     if not grid[x][y].played:
@@ -120,13 +132,13 @@ def play(grid, m, n):
     print(grid[x][y].neighbours_to())
     print(f'Already connected to: {grid[x][y].connected}')
 
-    print('Choose to which do to connect: ')
     while True:
         try:
-            k = int(input('Enter the x coordinate: '))
-            l = int(input('Enter the y coordinate: '))
+            k = int(input('Enter the x coordinate of the destination dot: '))
+            l = int(input('Enter the y coordinate of the destination dot: '))
+            # Choose which to connect to
             if k % 2 is 0 and l % 2 is 0:
-                if -1 < k < m and -1 < l < n:
+                if -1 < k < m and -1 < l < n and Dot((k, l)) not in grid[x][y].connected and (k is not x or l is not y):
                     if l > y:
                         grid[x][y + 1] = '_'
                     elif k > x:
@@ -155,9 +167,8 @@ def play(grid, m, n):
                             player_two_pts += 1
                     else:
                         turn = not turn
-
                 else:
-                    print('Out of range!')
+                    print('Out of range or already played!')
                 break
             else:
                 print('Only dots!')
@@ -166,31 +177,65 @@ def play(grid, m, n):
 
 
 def check_grid(grid, m, n):
+    global done
     for i in range(m):
         for j in range(n):
-            if grid[i][j] is '_' and grid[i + 1][j + 1] is '|' and grid[i + 2][j] is '_' and grid[i + 1][j - 1] is '|':
-                grid[i + 1][j] = '#'
-                return True
+            if -1 < i < m - 1:
+                if grid[i][j] is '_' and grid[i + 1][j + 1] is '|' and grid[i + 2][j] is '_' and grid[i + 1][j - 1] is \
+                        '|' and grid[i + 1][j] not in done:
+                    done.append(grid[i + 1][j])
+                    grid[i + 1][j] = '#'
+                    return True
     return False
 
 
+def end_game(end):
+    if len(done) is end:
+        return True
+    else:
+        return False
+
+
 def main():
+    # Input for boxes
     while True:
         try:
             m = int(input('Enter number of dots (row): '))
             n = int(input('Enter number of dots (column): '))
+            if m < 1:
+                m = 1
+            if n < 1:
+                n = 1
             break
         except ValueError:
             print('Try again.')
             pass
 
+    # So the 3 x 3 will create 3 boxes
+    m += 1
+    n += 1
+
+    # 3 x 3 means 3 boxes but we need to increase this so that lines can fit
     m += m - 1
     n += n - 1
 
+    # This many boxes can be filled
+    end = int(((m - 1) / 2) * ((n - 1) / 2))
+
+    # Creates the grid, One dot one blank space for lines
     grid = create_grid(m, n)
     while True:
         print_grid(grid)
         play(grid, m, n)
+        # Checks if the game eneded
+        if end_game(end):
+            if player_one_pts > player_two_pts:
+                print('Player one wins!')
+            elif player_two_pts > player_one_pts:
+                print('Player two wins!')
+            else:
+                print('Even!')
+            break
 
 
 if __name__ == '__main__':
