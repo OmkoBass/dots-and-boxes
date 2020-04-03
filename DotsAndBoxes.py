@@ -43,7 +43,7 @@ class Dot:
             if not dot.played:
                 neighbours.append(dot)
 
-        sorted(neighbours, key=lambda dots:dot.x)
+        sorted(neighbours, key=lambda dots: dot.x)
 
         return f'{self.x}{self.y} is a neighbour to: {neighbours}'
 
@@ -193,8 +193,9 @@ def check_grid(grid, m, n):
     global done
     for i in range(m):
         for j in range(n):
+            # Check for 11 or 13 or 31 or 33 or positions like that
             if i % 2 == 1 and j % 2 == 1:
-                if grid[i - 1][j].played and grid[i][j + 1].played and grid[i + 1][j].played and grid[i][j - 1].played\
+                if grid[i - 1][j].played and grid[i][j + 1].played and grid[i + 1][j].played and grid[i][j - 1].played \
                         and grid[i][j] not in done:
                     done.append(grid[i][j])
                     grid[i][j].look = '#'
@@ -249,6 +250,8 @@ def main():
                 print('Player two wins!')
             else:
                 print('Even!')
+            print(f'Player one scored: {player_one_pts}')
+            print(f'Player two scored: {player_two_pts}')
             break
 
 
