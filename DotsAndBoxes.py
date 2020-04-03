@@ -36,7 +36,7 @@ class Dot:
         else:
             return False
 
-    # Display neighborus to a dot and sort them
+    # Display neighbours to a dot and sort them
     def neighbours_to(self):
         neighbours = []
         for dot in self.neighbours:
@@ -46,6 +46,15 @@ class Dot:
         sorted(neighbours, key=lambda dots:dot.x)
 
         return f'{self.x}{self.y} is a neighbour to: {neighbours}'
+
+
+class space:
+    def __init__(self):
+        self.look = ' '
+        self.played = False
+
+    def __str__(self):
+        return f'{self.look}'
 
 
 def create_grid(m, n):
@@ -58,7 +67,7 @@ def create_grid(m, n):
             if i % 2 is 0 and j % 2 is 0:
                 temp.append(Dot((i, j)))
             else:
-                temp.append(' ')
+                temp.append(space())
         matrix.append(temp)
 
     # Now since the indexing is moved these are the rules for connecting everyone,
@@ -140,13 +149,17 @@ def play(grid, m, n):
             if k % 2 is 0 and l % 2 is 0:
                 if -1 < k < m and -1 < l < n and Dot((k, l)) not in grid[x][y].connected and (k is not x or l is not y):
                     if l > y:
-                        grid[x][y + 1] = '_'
+                        grid[x][y + 1].look = '_'
+                        grid[x][y + 1].played = True
                     elif k > x:
-                        grid[x + 1][y] = '|'
+                        grid[x + 1][y].look = '|'
+                        grid[x + 1][y].played = True
                     elif y > l:
-                        grid[x][y - 1] = '_'
+                        grid[x][y - 1].look = '_'
+                        grid[x][y - 1].played = True
                     elif x > k:
-                        grid[x - 1][y] = '|'
+                        grid[x - 1][y].look = '|'
+                        grid[x - 1][y].played = True
                     grid[x][y].connected.append(grid[k][l])
                     grid[k][l].connected.append(grid[x][y])
 
@@ -180,11 +193,11 @@ def check_grid(grid, m, n):
     global done
     for i in range(m):
         for j in range(n):
-            if -1 < i < m - 1:
-                if grid[i][j] is '_' and grid[i + 1][j + 1] is '|' and grid[i + 2][j] is '_' and grid[i + 1][j - 1] is \
-                        '|' and grid[i + 1][j] not in done:
-                    done.append(grid[i + 1][j])
-                    grid[i + 1][j] = '#'
+            if i % 2 == 1 and j % 2 == 1:
+                if grid[i - 1][j].played and grid[i][j + 1].played and grid[i + 1][j].played and grid[i][j - 1].played\
+                        and grid[i][j] not in done:
+                    done.append(grid[i][j])
+                    grid[i][j].look = '#'
                     return True
     return False
 
@@ -227,8 +240,9 @@ def main():
     while True:
         print_grid(grid)
         play(grid, m, n)
-        # Checks if the game eneded
+        # Checks if the game ended
         if end_game(end):
+            print_grid(grid)
             if player_one_pts > player_two_pts:
                 print('Player one wins!')
             elif player_two_pts > player_one_pts:
