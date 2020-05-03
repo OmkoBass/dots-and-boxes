@@ -64,7 +64,7 @@ def create_grid(m, n):
     for i in range(m):
         temp = []
         for j in range(n):
-            if i % 2 is 0 and j % 2 is 0:
+            if i % 2 == 0 and j % 2 == 0:
                 temp.append(Dot((i, j)))
             else:
                 temp.append(space())
@@ -75,7 +75,7 @@ def create_grid(m, n):
     # [1][1] has a neighbour everywhere around him (except diagonal)
     for i in range(m):
         for j in range(n):
-            if i % 2 is 0 and j % 2 is 0:
+            if i % 2 == 0 and j % 2 == 0:
                 if 0 < i < m - 1 and 0 < j < n - 1:
                     matrix[i][j].neighbours = [matrix[i - 2][j], matrix[i][j + 2], matrix[i + 2][j], matrix[i][j - 2]]
                 elif i == 0:
@@ -125,7 +125,7 @@ def play(grid, m, n):
             x = int(input('Enter the x coordinate of the starting dot: '))
             y = int(input('Enter the y coordinate of the starting dot: '))
             # If not line and in range and not connected all dots
-            if x % 2 is 0 and y % 2 is 0:
+            if x % 2 == 0 and y % 2 == 0:
                 if -1 < x < m and -1 < y < n:
                     if not grid[x][y].played:
                         break
@@ -146,7 +146,7 @@ def play(grid, m, n):
             k = int(input('Enter the x coordinate of the destination dot: '))
             l = int(input('Enter the y coordinate of the destination dot: '))
             # Choose which to connect to
-            if k % 2 is 0 and l % 2 is 0:
+            if k % 2 == 0 and l % 2 == 0:
                 if -1 < k < m and -1 < l < n and Dot((k, l)) not in grid[x][y].connected and (k is not x or l is not y):
                     if l > y:
                         grid[x][y + 1].look = '_'
